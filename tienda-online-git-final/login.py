@@ -1,12 +1,13 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash, current_app
 from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import secrets
-from flask_mail import Mail, Message
+from flask_mail import Message
+import re  # Import para validación de contraseña
 
 login_bp = Blueprint('login', __name__)
-mail = Mail()
+# Nota: elimina o comenta la línea mail = Mail() si la tienes aquí para evitar conflictos con la inicialización en app.py
 
 # Singleton para la colección de usuarios
 class UsersDB:
@@ -54,6 +55,15 @@ def registro():
         usuario = request.form['usuario']
         email = request.form['email']
         password = request.form['password']
+
+        # Validar contraseña: exactamente 8 caracteres y al menos una mayúscula
+        if len(password) != 8:
+            flash('La contraseña debe tener exactamente 8 caracteres', 'error')
+            return render_template('login/registro.html')
+        if not re.search(r'[A-Z]', password):
+            flash('La contraseña debe contener al menos una letra mayúscula', 'error')
+            return render_template('login/registro.html')
+
         if users_db.find_one({'usuario': usuario}):
             flash('El usuario ya existe', 'error')
         elif users_db.find_one({'email': email}):
@@ -94,6 +104,7 @@ def recuperacion():
                 Saludos,
                 NEON GAMING STORE
                 '''
+                mail = current_app.extensions.get('mail')
                 mail.send(msg)
                 flash('Se ha enviado un código de verificación a tu email', 'success')
                 session['recuperacion_email'] = email
