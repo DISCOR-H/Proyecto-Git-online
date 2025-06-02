@@ -6,14 +6,9 @@ import logging
 from productos import calcular_total_carrito
 from login import login_required
 
-# Configurar logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Crear el Blueprint
 vista_bp = Blueprint('vista', __name__)
 
 class VistaProductoDB:
@@ -23,7 +18,6 @@ class VistaProductoDB:
         if cls._instance is None:
             cls._instance = super(VistaProductoDB, cls).__new__(cls)
             try:
-                # Conexión a MongoDB
                 cls._instance.client = MongoClient('mongodb+srv://taniamelany2003:admin123@tania.gtqnh.mongodb.net/')
                 cls._instance.db = cls._instance.client['gamerdb']
                 cls._instance.collection = cls._instance.db['agregarproductos']
@@ -39,10 +33,6 @@ class VistaProductoDB:
                 logger.warning(f"ID de producto inválido: {producto_id}")
                 return None
             producto = self.collection.find_one({'_id': ObjectId(producto_id)})
-            if producto:
-                logger.info(f"Producto encontrado: {producto.get('title', 'Sin título')}")
-            else:
-                logger.warning(f"No se encontró producto con ID: {producto_id}")
             return producto
         except Exception as e:
             logger.error(f"Error al obtener producto por ID: {e}")
@@ -65,7 +55,6 @@ class VistaProductoDB:
                     }).limit(faltantes)
                 )
                 productos_relacionados.extend(otros_productos)
-            logger.info(f"Productos relacionados encontrados: {len(productos_relacionados)}")
             return productos_relacionados
         except Exception as e:
             logger.error(f"Error al obtener productos relacionados: {e}")
@@ -83,18 +72,18 @@ class VistaProductoDB:
             logger.error(f"Error al obtener comentarios: {e}")
             return []
 
-    def agregar_comentario(self, producto_id, usuario, texto):
+    def agregar_comentario(self, producto_id, usuario, texto, calificacion):
         try:
             self.db['comentarios_productos'].insert_one({
                 'producto_id': ObjectId(producto_id),
                 'usuario': usuario,
                 'texto': texto,
+                'calificacion': calificacion,
                 'fecha': datetime.utcnow()
             })
-            logger.info("Comentario agregado exitosamente")
+            logger.info("Comentario con calificación agregado exitosamente")
         except Exception as e:
             logger.error(f"Error al agregar comentario: {e}")
-
 
 @vista_bp.route('/producto/<producto_id>')
 @login_required
@@ -128,15 +117,15 @@ def detalle_producto(producto_id):
         flash('Error al cargar el producto', 'error')
         return redirect(url_for('productos.productos'))
 
-
 @vista_bp.route('/comentario/<producto_id>', methods=['POST'])
 @login_required
 def agregar_comentario(producto_id):
     comentario = request.form.get('comentario')
+    calificacion = int(request.form.get('calificacion', 0))
     usuario = session.get('usuario')
 
     if comentario and usuario:
         db = VistaProductoDB()
-        db.agregar_comentario(producto_id, usuario, comentario)
+        db.agregar_comentario(producto_id, usuario, comentario, calificacion)
 
     return redirect(url_for('vista.detalle_producto', producto_id=producto_id))

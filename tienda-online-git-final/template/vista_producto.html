@@ -259,11 +259,19 @@
         <!-- COMENTARIOS -->
         <div style="margin-top: 3rem;">
             <h2 style="color: var(--accent); text-align: center;">Comentarios</h2>
-            {% for c in comentarios %}
+            {% for comentario in comentarios %}
                 <div style="background: var(--card-bg); padding: 1rem; border-radius: 10px; margin: 1rem 0; box-shadow: 0 0 10px var(--accent2);">
-                    <strong style="color: var(--accent2);">{{ c.usuario }}</strong>
-                    <small style="color: #888; float: right;">{{ c.fecha.strftime('%d/%m/%Y %H:%M') if c.fecha else '' }}</small>
-                    <p style="margin-top: 0.5rem;">{{ c.texto }}</p>
+                    <strong style="color: var(--accent2);">{{ comentario.usuario }}</strong>
+                    <small style="color: #888; float: right;">{{ comentario.fecha.strftime('%d/%m/%Y %H:%M') if comentario.fecha else '' }}</small>
+                    <p style="margin-top: 0.5rem;">{{ comentario.texto }}</p>
+                    <p>Calificación:
+                        {% for i in range(comentario.calificacion) %}
+                            ★
+                        {% endfor %}
+                        {% for i in range(5 - comentario.calificacion) %}
+                            ☆
+                        {% endfor %}
+                    </p>
                 </div>
             {% else %}
                 <p style="text-align: center;">No hay comentarios todavía.</p>
@@ -274,33 +282,28 @@
         {% if session['usuario'] %}
         <div class="comment-form" style="margin-top: 3rem;">
             <h2 style="color: var(--accent); text-align: center;">Deja un comentario</h2>
-            <form action="{{ url_for('vista.agregar_comentario', producto_id=producto._id) }}" method="post" style="max-width: 700px; margin: 0 auto;">
+            <form action="{{ url_for('vista.agregar_comentario', producto_id=producto._id) }}" method="POST" style="max-width: 700px; margin: 0 auto;">
                 <textarea name="comentario" rows="4" placeholder="Escribe tu opinión..." required
                     style="width: 100%; padding: 1rem; border-radius: 12px; background-color: var(--card-bg); color: var(--text); border: 2px solid var(--accent); font-size: 1rem;"></textarea>
+
+                <label for="calificacion" style="display:block; margin-top: 1rem; color: var(--accent); font-weight: bold;">Calificación:</label>
+                <select name="calificacion" required style="width: 100%; padding: 0.6rem; border-radius: 8px; background-color: var(--card-bg); color: var(--text); border: 2px solid var(--accent); font-size: 1rem; margin-top: 0.5rem;">
+                    <option value="">Seleccionar</option>
+                    <option value="1">★☆☆☆☆</option>
+                    <option value="2">★★☆☆☆</option>
+                    <option value="3">★★★☆☆</option>
+                    <option value="4">★★★★☆</option>
+                    <option value="5">★★★★★</option>
+                </select>
+
                 <button type="submit" style="margin-top: 1rem; background: linear-gradient(90deg, var(--accent), var(--accent2)); color: #181c2f; border: none; border-radius: 12px; padding: 0.8rem 2rem; font-size: 1.1rem; font-weight: bold; cursor: pointer;">
                     Enviar
                 </button>
             </form>
         </div>
         {% endif %}
+
     </div>
 
-    <!-- JS: feedback al agregar -->
-    <script>
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                const button = this.querySelector('button');
-                if (!button.disabled) {
-                    const originalText = button.innerHTML;
-                    button.innerHTML = '<i class="fas fa-check"></i> ¡Agregado!';
-                    button.style.background = 'linear-gradient(90deg, var(--accent2), var(--accent))';
-                    setTimeout(() => {
-                        button.innerHTML = originalText;
-                        button.style.background = '';
-                    }, 1000);
-                }
-            });
-        });
-    </script>
 </body>
 </html>
