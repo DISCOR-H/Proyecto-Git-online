@@ -14,7 +14,7 @@
             {% endif %}
         {% endwith %}
 
-        <form method="post" class="auth-form">
+        <form method="post" action="{{ url_for('login.registro') }}" class="auth-form">
             <div class="form-group">
                 <label>Usuario:</label>
                 <input type="text" name="usuario" required>
