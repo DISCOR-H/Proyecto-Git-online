@@ -29,7 +29,7 @@ app.register_blueprint(comentarios_bp)
 # Ruta principal: Redirigir la ruta principal al login
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', mensaje="¡Gracias por visitarnos!")#hola a todes#
 
 if __name__ == '__main__':
     app.run(debug=True)
