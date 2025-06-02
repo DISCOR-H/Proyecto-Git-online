@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NEON GAMING STORE{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --accent: #00ffe7;
+            --accent2: #ff00c8;
+            --text: #ffffff;
+            --card-bg: #1a1c2e;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Orbitron', sans-serif;
+            background-color: #0a0b14;
+            color: var(--text);
+        }
+        header {
+            background: var(--card-bg);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 0 20px var(--accent2);
+        }
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        /* ...puedes agregar aquí más estilos globales... */
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <span style="color:#ff00c8;">NEON</span> GAMING STORE
+        </div>
+    </header>
+    {% block content %}{% endblock %}
+</body>
+</html>

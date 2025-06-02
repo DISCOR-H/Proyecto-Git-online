@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Registro - NEON GAMING STORE{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-box">
+        <h2><span style="color:#ff00c8;">NEON</span> GAMING STORE</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="post" class="auth-form">
+            <div class="form-group">
+                <label>Usuario:</label>
+                <input type="text" name="usuario" required>
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label>Contraseña:</label>
+                <input type="password" name="password" required>
+            </div>
+            <button type="submit" class="auth-btn">Registrarse</button>
+        </form>
+
+        <div class="auth-links">
+            <p>¿Ya tienes cuenta? <a href="{{ url_for('login.login') }}">Inicia sesión aquí</a></p>
+        </div>
+    </div>
+</div>
+
+<style>
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    padding: 2rem;
+}
+
+.auth-box {
+    background: #181c2f;
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 0 24px var(--accent2);
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-box h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+}
+
+.auth-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.auth-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--accent);
+}
+
+.auth-form input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 2px solid var(--accent2);
+    border-radius: 8px;
+    background: #1a1c2e;
+    color: white;
+}
+
+.auth-form input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+}
+
+.auth-btn {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 8px;
+    color: #181c2f;
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.auth-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 16px var(--accent2);
+}
+
+.auth-links {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.auth-links a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.auth-links a:hover {
+    color: var(--accent2);
+}
+
+.alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.alert.error {
+    background: #ff3b3b33;
+    color: #ff3b3b;
+}
+
+.alert.success {
+    background: #00ff9933;
+    color: #00ff99;
+}
+</style>
+{% endblock %}

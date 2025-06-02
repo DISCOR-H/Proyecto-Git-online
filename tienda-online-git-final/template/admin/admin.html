@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - NEON GAMING STORE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .admin-container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .admin-card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 0 12px #00ffe7a0;
+        }
+
+        .product-form {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 2px solid var(--accent2);
+            background: rgba(0,0,0,0.2);
+            color: var(--text);
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        .submit-btn {
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            color: #181c2f;
+            border: none;
+            border-radius: 8px;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 16px var(--accent2);
+        }
+
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+        }
+
+        .products-table th,
+        .products-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--accent2);
+        }
+
+        .products-table th {
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 0.5rem;
+            font-weight: bold;
+        }
+
+        .edit-btn {
+            background: var(--accent);
+            color: #181c2f;
+        }
+
+        .delete-btn {
+            background: #ff4444;
+            color: white;
+        }
+
+        .preview-image {
+            max-width: 100px;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+        }
+
+        .success-message {
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            background: rgba(255, 0, 0, 0.1);
+            border: 2px solid #ff0000;
+            color: #ff0000;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <span style="color:#ff00c8;">NEON</span> GAMING STORE - Admin Panel
+    </header>
+
+    <div class="admin-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="{{ category }}-message">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="admin-card">
+            <h2 style="color: var(--accent); margin-bottom: 1.5rem;">Agregar Nuevo Producto</h2>
+            <form class="product-form" action="{{ url_for('admin.add_product') }}" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title">Título del Producto</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="price">Precio</label>
+                    <input type="number" id="price" name="price" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Descripción</label>
+                    <textarea id="description" name="description" rows="4" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Categoría</label>
+                    <select id="category" name="category" required>
+                        <option value="consolas">Consolas</option>
+                        <option value="accesorios">Accesorios</option>
+                        <option value="juegos">Juegos</option>
+                        <option value="merchandising">Merchandising</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="stock">Stock</label>
+                    <input type="number" id="stock" name="stock" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="image">Imagen del Producto</label>
+                    <input type="file" id="image" name="image" accept="image/*" required>
+                    <img id="preview" class="preview-image" style="display: none;">
+                </div>
+
+                <button type="submit" class="submit-btn">Agregar Producto</button>
+            </form>
+        </div>
+
+        <div class="admin-card">
+            <h2 style="color: var(--accent); margin-bottom: 1.5rem;">Productos Existentes</h2>
+            <table class="products-table">
+                <thead>
+                    <tr>
+                        <th>Imagen</th>
+                        <th>Título</th>
+                        <th>Precio</th>
+                        <th>Categoría</th>
+                        <th>Stock</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td><img src="{{ url_for('static', filename='uploads/' + product.image) }}" alt="{{ product.title }}" style="width: 50px; height: 50px; object-fit: cover;"></td>
+                        <td>{{ product.title }}</td>
+                        <td>${{ product.price }}</td>
+                        <td>{{ product.category }}</td>
+                        <td>{{ product.stock }}</td>
+                        <td>
+                            <button class="action-btn edit-btn" onclick="editProduct('{{ product._id }}')">Editar</button>
+                            <button class="action-btn delete-btn" onclick="deleteProduct('{{ product._id }}')">Eliminar</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Preview de imagen
+        document.getElementById('image').addEventListener('change', function(e) {
+            const preview = document.getElementById('preview');
+            const file = e.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Funciones para editar y eliminar
+        function editProduct(productId) {
+            if (confirm('¿Deseas editar este producto?')) {
+                window.location.href = `/admin/edit/${productId}`;
+            }
+        }
+
+        function deleteProduct(productId) {
+            if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+                fetch(`/admin/delete/${productId}`, {
+                    method: 'DELETE',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error al eliminar el producto');
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

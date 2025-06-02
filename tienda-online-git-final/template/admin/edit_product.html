@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Producto - NEON GAMING STORE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Aquí puedes incluir los mismos estilos del admin.html -->
+</head>
+<body>
+    <header>
+        <span style="color:#ff00c8;">NEON</span> GAMING STORE - Editar Producto
+    </header>
+
+    <div class="admin-container">
+        <div class="admin-card">
+            <h2 style="color: var(--accent); margin-bottom: 1.5rem;">Editar Producto</h2>
+            <form class="product-form" action="{{ url_for('admin.edit_product', product_id=product._id) }}" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title">Título del Producto</label>
+                    <input type="text" id="title" name="title" value="{{ product.title }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="price">Precio</label>
+                    <input type="number" id="price" name="price" step="0.01" value="{{ product.price }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Descripción</label>
+                    <textarea id="description" name="description" rows="4" required>{{ product.description }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Categoría</label>
+                    <select id="category" name="category" required>
+                        <option value="consolas" {% if product.category == 'consolas' %}selected{% endif %}>Consolas</option>
+                        <option value="accesorios" {% if product.category == 'accesorios' %}selected{% endif %}>Accesorios</option>
+                        <option value="juegos" {% if product.category == 'juegos' %}selected{% endif %}>Juegos</option>
+                        <option value="merchandising" {% if product.category == 'merchandising' %}selected{% endif %}>Merchandising</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="stock">Stock</label>
+                    <input type="number" id="stock" name="stock" value="{{ product.stock }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="image">Imagen del Producto</label>
+                    <input type="file" id="image" name="image" accept="image/*">
+                    <img src="{{ url_for('static', filename='uploads/' + product.image) }}" alt="{{ product.title }}" class="preview-image">
+                </div>
+
+                <button type="submit" class="submit-btn">Actualizar Producto</button>
+                <a href="{{ url_for('admin.admin_panel') }}" class="submit-btn" style="background: var(--card-bg); text-align: center; text-decoration: none; margin-top: 1rem;">Cancelar</a>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Preview de imagen
+        document.getElementById('image').addEventListener('change', function(e) {
+            const preview = document.querySelector('.preview-image');
+            const file = e.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+            }
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>

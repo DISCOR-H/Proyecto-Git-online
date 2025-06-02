@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Carrito de Compras - NEON GAMING STORE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        :root {
+            --accent: #00ffe7;
+            --accent2: #ff00c8;
+            --text: #ffffff;
+            --card-bg: #1a1c2e;
+        }
+        body {
+            background-color: #0a0b14;
+            color: var(--text);
+            font-family: 'Orbitron', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: var(--card-bg);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: bold;
+            box-shadow: 0 0 20px var(--accent2);
+            margin-bottom: 2rem;
+        }
+        .carrito-container {
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #181c2f;
+            border-radius: 20px;
+            box-shadow: 0 0 24px #00ffe7a0;
+        }
+        .carrito-title {
+            color: var(--accent);
+            text-align: center;
+            margin-bottom: 2.5rem;
+            text-shadow: 0 0 8px var(--accent2);
+            font-size: 2.2rem;
+        }
+        .carrito-main {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+        .carrito-lista {
+            flex: 2;
+        }
+        .carrito-acciones {
+            flex: 1;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 0 12px #ff00c8a0;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            min-width: 260px;
+            max-width: 320px;
+            margin-top: 0.5rem;
+            height: fit-content;
+        }
+        .carrito-total {
+            font-size: 1.5rem;
+            color: var(--accent);
+            text-shadow: 0 0 8px var(--accent2);
+            margin-bottom: 2rem;
+            text-align: right;
+        }
+        .carrito-total strong {
+            color: var(--accent2);
+        }
+        .continue-btn, .checkout-btn {
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            color: #181c2f;
+            border: none;
+            border-radius: 8px;
+            padding: 0.8rem 1.5rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+            box-shadow: 0 0 8px var(--accent2);
+            text-align: center;
+            text-decoration: none;
+        }
+        .checkout-btn {
+            margin-bottom: 0;
+        }
+        .continue-btn:hover, .checkout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 16px var(--accent2);
+            color: #fff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            border-radius: 18px;
+            box-shadow: 0 0 12px #00ffe7a0;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 1px solid #343a40;
+        }
+        th {
+            background-color: #343a40;
+            color: var(--accent);
+            text-transform: uppercase;
+        }
+        tbody tr:nth-child(odd) {
+            background-color: #212529;
+        }
+        .product-img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid var(--accent2);
+            box-shadow: 0 0 8px var(--accent2);
+        }
+        .qty-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .qty-btn {
+            background: var(--accent);
+            color: #181c2f;
+            border: none;
+            border-radius: 4px;
+            width: 28px;
+            height: 28px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .qty-btn:hover {
+            background: var(--accent2);
+            color: #fff;
+        }
+        .remove-btn {
+            background: none;
+            border: none;
+            color: var(--accent2);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .remove-btn:hover {
+            color: #ff3b3b;
+        }
+        .empty-cart {
+            text-align: center;
+            color: var(--accent);
+            font-size: 1.2rem;
+            margin-top: 2rem;
+        }
+        @media (max-width: 1000px) {
+            .carrito-main {
+                flex-direction: column;
+            }
+            .carrito-acciones {
+                max-width: 100%;
+                margin-top: 2rem;
+            }
+        }
+        @media (max-width: 600px) {
+            .carrito-container {
+                padding: 1rem;
+            }
+            th, td {
+                padding: 0.5rem;
+            }
+            .carrito-acciones {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <span style="color:#ff00c8;">NEON</span> GAMING STORE
+        </div>
+    </header>
+
+    <div class="carrito-container">
+        <div class="carrito-title">Carrito de Compras</div>
+        {% if carrito %}
+        <div class="carrito-main">
+            <div class="carrito-lista">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Imagen</th>
+                            <th>Producto</th>
+                            <th>Precio</th>
+                            <th>Cantidad</th>
+                            <th>Total</th>
+                            <th>Quitar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in carrito %}
+                        <tr>
+                            <td>
+                                <img src="{{ url_for('static', filename='uploads/' + item.image) if item.image else url_for('static', filename='placeholder.png') }}" class="product-img" alt="{{ item.title }}">
+                            </td>
+                            <td>{{ item.title }}</td>
+                            <td>${{ "%.2f"|format(item.price) }}</td>
+                            <td>
+                                <div class="qty-controls">
+                                    <form action="{{ url_for('productos.actualizar_cantidad', producto_id=item.id) }}" method="post" style="display:inline;">
+                                        <input type="hidden" name="cantidad" value="{{ item.cantidad - 1 }}">
+                                        <button type="submit" class="qty-btn" {% if item.cantidad <= 1 %}disabled{% endif %}>-</button>
+                                    </form>
+                                    <span>{{ item.cantidad }}</span>
+                                    <form action="{{ url_for('productos.actualizar_cantidad', producto_id=item.id) }}" method="post" style="display:inline;">
+                                        <input type="hidden" name="cantidad" value="{{ item.cantidad + 1 }}">
+                                        <button type="submit" class="qty-btn">+</button>
+                                    </form>
+                                </div>
+                            </td>
+                            <td>${{ "%.2f"|format(item.price * item.cantidad) }}</td>
+                            <td>
+                                <form action="{{ url_for('productos.eliminar_producto', producto_id=item.id) }}" method="post" style="display:inline;">
+                                    <button type="submit" class="remove-btn" title="Eliminar">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="carrito-acciones">
+                <div class="carrito-total">
+                    <strong>Total:</strong> ${{ "%.2f"|format(total_carrito) }}
+                </div>
+                <a href="{{ url_for('productos.productos') }}" class="continue-btn">Seguir comprando</a>
+                <button class="checkout-btn" type="button" onclick="abrirModal()">Finalizar Compra</button>
+            </div>
+        </div>
+        {% else %}
+            <p class="empty-cart">No hay productos en el carrito.</p>
+            <div style="text-align:center; margin-top:2rem;">
+                <a href="{{ url_for('productos.productos') }}" class="continue-btn">Ver productos</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Modal de pago -->
+<div id="modalPago" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModal()">&times;</span>
+    <h2>Selecciona método de pago</h2>
+    <button class="pago-btn" onclick="pagoQR()">Pago por QR</button>
+    <button class="pago-btn" onclick="pagoTarjeta()">Pago por tarjeta</button>
+    <div id="qr-section" style="display:none; margin-top:1.5rem; text-align:center;"></div>
+    <div id="tarjeta-section" style="display:none; margin-top:1.5rem; text-align:center;">
+      <p style="color:var(--accent2); font-size:1.2rem;">¡Pago exitoso!</p>
+      <button onclick="generarFactura()">Imprimir Factura</button>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts para el modal y QR -->
+<script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+<script>
+function abrirModal() {
+  document.getElementById('modalPago').style.display = 'flex';
+  document.getElementById('qr-section').style.display = 'none';
+  document.getElementById('tarjeta-section').style.display = 'none';
+}
+function cerrarModal() {
+  document.getElementById('modalPago').style.display = 'none';
+}
+function pagoQR() {
+  document.getElementById('qr-section').style.display = 'block';
+  document.getElementById('tarjeta-section').style.display = 'none';
+  // Solicitar la URL única de la factura al backend
+  fetch("{{ url_for('productos.generar_url_factura') }}")
+    .then(response => response.text())
+    .then(urlFactura => {
+      var qrSection = document.getElementById('qr-section');
+      qrSection.innerHTML = "<p>Escanea para descargar la factura</p><canvas id='qr-canvas'></canvas>";
+      new QRious({
+        element: document.getElementById('qr-canvas'),
+        value: urlFactura,
+        size: 200
+      });
+    });
+}
+function pagoTarjeta() {
+  document.getElementById('qr-section').style.display = 'none';
+  document.getElementById('tarjeta-section').style.display = 'block';
+}
+function generarFactura() {
+  fetch("{{ url_for('productos.generar_url_factura') }}")
+    .then(response => response.text())
+    .then(urlFactura => {
+      window.location.href = urlFactura;
+    });
+}
+</script>
+<style>
+/* Modal styles */
+.modal { position: fixed; z-index: 9999; left: 0; top: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; }
+.modal-content { background: #181c2f; padding: 2rem; border-radius: 16px; min-width: 320px; box-shadow: 0 0 24px var(--accent2); position: relative; }
+.close { position: absolute; right: 1rem; top: 1rem; font-size: 2rem; color: var(--accent2); cursor: pointer; }
+.pago-btn { margin: 1rem; padding: 0.8rem 2rem; border-radius: 8px; border: none; background: linear-gradient(90deg, var(--accent), var(--accent2)); color: #181c2f; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
+.pago-btn:hover { color: #fff; }
+</style>
