@@ -96,21 +96,14 @@
             font-size: 1.1rem;
             line-height: 1.6;
             margin-bottom: 2rem;
-            color: var(--text);
         }
         .product-stock {
             margin-bottom: 1.5rem;
             font-size: 1.1rem;
         }
-        .stock-available {
-            color: #00ff95;
-        }
-        .stock-low {
-            color: #ffcc00;
-        }
-        .stock-out {
-            color: #ff3b3b;
-        }
+        .stock-available { color: #00ff95; }
+        .stock-low { color: #ffcc00; }
+        .stock-out { color: #ff3b3b; }
         .add-cart-btn {
             background: linear-gradient(90deg, var(--accent), var(--accent2));
             color: #181c2f;
@@ -190,19 +183,14 @@
             font-weight: bold;
         }
         @media (max-width: 768px) {
-            .product-detail {
-                flex-direction: column;
-            }
-            .product-title {
-                font-size: 1.8rem;
-            }
-            .product-price {
-                font-size: 1.5rem;
-            }
+            .product-detail { flex-direction: column; }
+            .product-title { font-size: 1.8rem; }
+            .product-price { font-size: 1.5rem; }
         }
     </style>
 </head>
 <body>
+
     <!-- HEADER -->
     <header>
         <div>
@@ -224,8 +212,7 @@
 
         <div class="product-detail">
             <div class="product-image">
-                <img src="{{ url_for('static', filename='uploads/' + producto.image) if producto.image else url_for('static', filename='placeholder.png') }}" 
-                     alt="{{ producto.title }}">
+                <img src="{{ url_for('static', filename='uploads/' + producto.image) if producto.image else url_for('static', filename='placeholder.png') }}" alt="{{ producto.title }}">
             </div>
             <div class="product-info">
                 <h1 class="product-title">{{ producto.title }}</h1>
@@ -235,18 +222,17 @@
                 
                 <div class="product-stock">
                     {% if producto.stock > 10 %}
-                        <span class="stock-available"><i class="fas fa-check-circle"></i> En stock ({{ producto.stock }} disponibles)</span>
+                        <span class="stock-available"><i class="fas fa-check-circle"></i> En stock ({{ producto.stock }})</span>
                     {% elif producto.stock > 0 %}
-                        <span class="stock-low"><i class="fas fa-exclamation-circle"></i> ¡Quedan pocos! ({{ producto.stock }} disponibles)</span>
+                        <span class="stock-low"><i class="fas fa-exclamation-circle"></i> ¡Quedan pocos! ({{ producto.stock }})</span>
                     {% else %}
                         <span class="stock-out"><i class="fas fa-times-circle"></i> Agotado</span>
                     {% endif %}
                 </div>
-                
+
                 <form action="{{ url_for('productos.agregar_carrito', producto_id=producto._id) }}" method="post">
                     <button type="submit" class="add-cart-btn" {% if producto.stock <= 0 %}disabled{% endif %}>
-                        <i class="fas fa-shopping-cart"></i>
-                        Agregar al carrito
+                        <i class="fas fa-shopping-cart"></i> Agregar al carrito
                     </button>
                 </form>
             </div>
@@ -260,8 +246,7 @@
                 {% for rel_producto in productos_relacionados %}
                 <a href="{{ url_for('vista.detalle_producto', producto_id=rel_producto._id) }}" style="text-decoration: none;">
                     <div class="related-card">
-                        <img src="{{ url_for('static', filename='uploads/' + rel_producto.image) if rel_producto.image else url_for('static', filename='placeholder.png') }}" 
-                             alt="{{ rel_producto.title }}">
+                        <img src="{{ url_for('static', filename='uploads/' + rel_producto.image) if rel_producto.image else url_for('static', filename='placeholder.png') }}" alt="{{ rel_producto.title }}">
                         <div class="related-title">{{ rel_producto.title }}</div>
                         <div class="related-price">${{ "%.2f"|format(rel_producto.price) }}</div>
                     </div>
@@ -270,11 +255,38 @@
             </div>
         </div>
         {% endif %}
+
+        <!-- COMENTARIOS -->
+        <div style="margin-top: 3rem;">
+            <h2 style="color: var(--accent); text-align: center;">Comentarios</h2>
+            {% for c in comentarios %}
+                <div style="background: var(--card-bg); padding: 1rem; border-radius: 10px; margin: 1rem 0; box-shadow: 0 0 10px var(--accent2);">
+                    <strong style="color: var(--accent2);">{{ c.usuario }}</strong>
+                    <small style="color: #888; float: right;">{{ c.fecha.strftime('%d/%m/%Y %H:%M') if c.fecha else '' }}</small>
+                    <p style="margin-top: 0.5rem;">{{ c.texto }}</p>
+                </div>
+            {% else %}
+                <p style="text-align: center;">No hay comentarios todavía.</p>
+            {% endfor %}
+        </div>
+
+        <!-- FORMULARIO DE COMENTARIO -->
+        {% if session['usuario'] %}
+        <div class="comment-form" style="margin-top: 3rem;">
+            <h2 style="color: var(--accent); text-align: center;">Deja un comentario</h2>
+            <form action="{{ url_for('vista.agregar_comentario', producto_id=producto._id) }}" method="post" style="max-width: 700px; margin: 0 auto;">
+                <textarea name="comentario" rows="4" placeholder="Escribe tu opinión..." required
+                    style="width: 100%; padding: 1rem; border-radius: 12px; background-color: var(--card-bg); color: var(--text); border: 2px solid var(--accent); font-size: 1rem;"></textarea>
+                <button type="submit" style="margin-top: 1rem; background: linear-gradient(90deg, var(--accent), var(--accent2)); color: #181c2f; border: none; border-radius: 12px; padding: 0.8rem 2rem; font-size: 1.1rem; font-weight: bold; cursor: pointer;">
+                    Enviar
+                </button>
+            </form>
+        </div>
+        {% endif %}
     </div>
 
-    <!-- SCRIPTS -->
+    <!-- JS: feedback al agregar -->
     <script>
-        // Efecto visual para el botón de agregar al carrito
         document.querySelectorAll('form').forEach(form => {
             form.addEventListener('submit', function(e) {
                 const button = this.querySelector('button');
