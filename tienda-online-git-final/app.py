@@ -32,7 +32,7 @@ def index():
 
     return render_template('index.html', mensaje="¡Bienvenidos a nuestra tienda!")
 
- main
+
 
 if __name__ == '__main__':
     app.run(debug=True)
