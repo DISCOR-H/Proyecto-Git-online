@@ -5,6 +5,7 @@ from login import login_bp  # Nuevo blueprint para login
 from carrito import carrito_singleton
 from flask_mail import Mail
 from vista import vista_bp
+from comentarios import comentarios_bp
 
 app = Flask(__name__)
 app.secret_key = 'tu_clave_secreta_aqui'
@@ -23,6 +24,7 @@ app.register_blueprint(admin, url_prefix='/admin')
 app.register_blueprint(productos_bp, url_prefix='/productos')
 app.register_blueprint(login_bp)  # Registrar el blueprint de login
 app.register_blueprint(vista_bp)
+app.register_blueprint(comentarios_bp)
 
 # Ruta principal: Redirigir la ruta principal al login
 @app.route('/')
