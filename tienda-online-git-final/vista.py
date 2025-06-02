@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, session
+from flask import Blueprint, render_template, redirect, url_for, flash, session, request
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+from datetime import datetime
 import logging
 from productos import calcular_total_carrito
 from login import login_required
@@ -33,15 +34,13 @@ class VistaProductoDB:
         return cls._instance
 
     def get_product_by_id(self, producto_id):
-        """Obtiene un producto específico por su ID."""
         try:
             if not ObjectId.is_valid(producto_id):
                 logger.warning(f"ID de producto inválido: {producto_id}")
                 return None
-
             producto = self.collection.find_one({'_id': ObjectId(producto_id)})
             if producto:
-                logger.info(f"Producto encontrado por ID: {producto.get('title', 'Sin título')}")
+                logger.info(f"Producto encontrado: {producto.get('title', 'Sin título')}")
             else:
                 logger.warning(f"No se encontró producto con ID: {producto_id}")
             return producto
@@ -50,7 +49,6 @@ class VistaProductoDB:
             return None
 
     def get_related_products(self, producto_id, categoria, limit=4):
-        """Obtiene productos relacionados por categoría, excluyendo el producto actual."""
         try:
             productos_relacionados = list(
                 self.collection.find({
@@ -58,8 +56,6 @@ class VistaProductoDB:
                     'category': categoria
                 }).limit(limit)
             )
-
-            # Si no hay suficientes productos en la misma categoría, obtener otros productos
             if len(productos_relacionados) < limit:
                 faltantes = limit - len(productos_relacionados)
                 otros_productos = list(
@@ -69,17 +65,40 @@ class VistaProductoDB:
                     }).limit(faltantes)
                 )
                 productos_relacionados.extend(otros_productos)
-
             logger.info(f"Productos relacionados encontrados: {len(productos_relacionados)}")
             return productos_relacionados
         except Exception as e:
             logger.error(f"Error al obtener productos relacionados: {e}")
             return []
 
+    def get_comentarios(self, producto_id):
+        try:
+            comentarios = list(
+                self.db['comentarios_productos'].find(
+                    {'producto_id': ObjectId(producto_id)}
+                ).sort('fecha', -1)
+            )
+            return comentarios
+        except Exception as e:
+            logger.error(f"Error al obtener comentarios: {e}")
+            return []
+
+    def agregar_comentario(self, producto_id, usuario, texto):
+        try:
+            self.db['comentarios_productos'].insert_one({
+                'producto_id': ObjectId(producto_id),
+                'usuario': usuario,
+                'texto': texto,
+                'fecha': datetime.utcnow()
+            })
+            logger.info("Comentario agregado exitosamente")
+        except Exception as e:
+            logger.error(f"Error al agregar comentario: {e}")
+
+
 @vista_bp.route('/producto/<producto_id>')
 @login_required
 def detalle_producto(producto_id):
-    """Muestra los detalles de un producto específico."""
     try:
         db = VistaProductoDB()
         producto = db.get_product_by_id(producto_id)
@@ -88,23 +107,36 @@ def detalle_producto(producto_id):
             flash('Producto no encontrado', 'error')
             return redirect(url_for('productos.productos'))
 
-        # Obtener productos relacionados
         productos_relacionados = db.get_related_products(
             producto_id,
             producto.get('category', ''),
             limit=4
         )
 
-        # Calcular total del carrito
         total_carrito = calcular_total_carrito()
+        comentarios = db.get_comentarios(producto_id)
 
         return render_template(
             'vista_producto.html',
             producto=producto,
             productos_relacionados=productos_relacionados,
-            total_carrito=total_carrito
+            total_carrito=total_carrito,
+            comentarios=comentarios
         )
     except Exception as e:
         logger.error(f"Error en la ruta /producto/{producto_id}: {e}")
         flash('Error al cargar el producto', 'error')
         return redirect(url_for('productos.productos'))
+
+
+@vista_bp.route('/comentario/<producto_id>', methods=['POST'])
+@login_required
+def agregar_comentario(producto_id):
+    comentario = request.form.get('comentario')
+    usuario = session.get('usuario')
+
+    if comentario and usuario:
+        db = VistaProductoDB()
+        db.agregar_comentario(producto_id, usuario, comentario)
+
+    return redirect(url_for('vista.detalle_producto', producto_id=producto_id))
